@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <!-- Greets the logged-in user -->
+        <h2 class="fw-bold">Hi, {{ current_user.username }}!</h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Column (for mobile view) -->
+    <div class="col-lg-8 col-md-10 mx-auto">
+
+        <!-- Total Balance Card -->
+        <div class="card text-center text-white bg-primary">
+            <div class="card-body">
+                <h6 class="card-title text-white-50">Total Balance</h6>
+                <!-- Uses the 'balance' property from app.py -->
+                <h2 class="card-text display-5 fw-bold">₹{{ "%.2f"|format(total_balance) }}</h2>
+                <p class="card-text text-white-50 mb-0">{{ 'now'|format_datetime('%B %Y') }}</p>
+            </div>
+        </div>
+
+        <!-- Cash Flow Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Cash Flow this Month</h5>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-up-circle-fill fs-2 text-success me-3"></i>
+                        <div>
+                            <span class="text-muted">Income</span>
+                            <h4 class="fw-bold mb-0">₹{{ "%.2f"|format(total_income) }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-down-circle-fill fs-2 text-danger me-3"></i>
+                        <div>
+                            <span class="text-muted">Expense</span>
+                            <h4 class="fw-bold mb-0">₹{{ "%.2f"|format(total_expense) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Expenses by Category</h5>
+                <div class="row">
+                    <!-- Donut Chart -->
+                    <div class="col-md-6 col-12 d-flex justify-content-center align-items-center" style="max-height: 200px;">
+                        <canvas id="categoryDonutChart"></canvas>
+                    </div>
+                    <!-- Legend/List -->
+                    <div class="col-md-6 col-12 pt-3">
+                        {% for category, total in category_data %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ category }}</span>
+                            <span class="fw-bold">₹{{ "%.2f"|format(total) }}</span>
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center">No expenses this month.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Recent Transactions</h5>
+                <ul class="list-group list-group-flush">
+                    {% for txn in recent_transactions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div class="d-flex align-items-center">
+                             <i class="bi bi-{{ 'arrow-down-left-circle-fill' if txn.type == 'Expense' else 'arrow-up-right-circle-fill' }} fs-2 me-3 {{ 'text-danger' if txn.type == 'Expense' else 'text-success' }}"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ txn.category }}</h6>
+                                <small class="text-muted">{{ txn.reference if txn.reference else 'No reference' }}</small>
+                            </div>
+                        </div>
+                        <span class="fw-bold {{ 'text-danger' if txn.type == 'Expense' else 'text-success' }}">
+                            {{ '-' if txn.type == 'Expense' else '+' }}₹{{ "%.2f"|format(txn.amount) }}
+                        </span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted text-center">No transactions yet.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary w-100 mt-3">View All Transactions</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- This block adds the JavaScript for the chart -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Donut Chart ---
+    // Get data from the 'category_data' variable passed from app.py
+    const categoryData = {{ category_data|tojson }};
+    const labels = categoryData.map(item => item[0]); // item[0] is category name
+    const data = categoryData.map(item => item[1]);   // item[1] is total
+    
+    // Generate random colors for the chart
+    const colors = data.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.8)`);
+
+    const ctx = document.getElementById('categoryDonutChart');
+    
+    // Only draw the chart if there is data
+    if (ctx && data.length > 0) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Expenses',
+                    data: data,
+                    backgroundColor: colors,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // We hide the default legend and use our own HTML one
+                    }
+                }
+            }
+        });
+    } else if (ctx) {
+        // Optional: Show a message if there's no data
+        ctx.getContext('2d').fillText('No expense data to display', ctx.width / 2 - 50, ctx.height / 2);
+    }
+});
+</script>
+{% endblock %}

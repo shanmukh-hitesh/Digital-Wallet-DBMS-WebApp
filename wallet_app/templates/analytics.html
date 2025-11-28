@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h2 class="fw-bold">Analytics</h2>
+        <p class="text-muted">{{ "now"|format_datetime('%B %Y') }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        
+        <!-- Line Chart Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Expenses This Month</h5>
+                <!-- This canvas is where the line chart will be drawn -->
+                <canvas id="dailyExpenseChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Cash Flow Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Cash Flow ({{ "now"|format_datetime('%B') }})</h5>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Income</span>
+                    <span class="fw-bold text-success">+ ₹{{ "%.2f"|format(this_month_income) }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Expenses</span>
+                    <span class="fw-bold text-danger">- ₹{{ "%.2f"|format(this_month_expense) }}</span>
+                </div>
+                <hr class="border-2 border-primary">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Total</span>
+                    <span class="fw-bold fs-5">₹{{ "%.2f"|format(this_month_total) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Averages Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Average Expenses</h5>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Per Day (this month)</span>
+                    <span class="fw-bold">₹{{ "%.2f"|format(avg_daily_expense) }}</span>
+                </div>
+                <!-- You can add more averages here (e.g., weekly) by updating app.py -->
+            </div>
+        </div>
+        
+        <!-- Compare Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Compare</h5>
+                <!-- THIS LINE IS FIXED: -->
+                <p class="text-muted mb-2">vs. {{ last_month_name }}</p>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Cash Flow</span>
+                    {% set difference = this_month_total - last_month_total %}
+                    <span class="fw-bold {{ 'text-success' if difference > 0 else 'text-danger' }}">
+                        {{ '+' if difference > 0 else '' }}₹{{ "%.2f"|format(difference) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- This JavaScript block creates the line chart -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('dailyExpenseChart');
+    const chartLabels = {{ chart_labels|tojson }};
+    const chartData = {{ chart_data|tojson }};
+    
+    // Only draw the chart if there is data
+    if (ctx && chartData.length > 0) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Daily Expense',
+                    data: chartData,
+                    fill: true,
+                    borderColor: 'rgb(255, 99, 132)', // Red line
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light red fill
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    } else if (ctx) {
+        // Show a message if there is no data
+        ctx.getContext('2d').fillText('No expense data to display', ctx.width / 2 - 50, ctx.height / 2);
+    }
+});
+</script>
+{% endblock %}

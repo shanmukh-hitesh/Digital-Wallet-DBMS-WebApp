@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Digital Wallet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* Basic body styling */
+        body { 
+            background-color: #f8f9fa; /* Light gray background */
+            padding-bottom: 80px; /* Add padding for the bottom nav */
+        }
+        /* Style for the cards to match your photos */
+        .card {
+            border: none;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Soft shadow */
+            margin-bottom: 1.5rem;
+        }
+        .navbar-brand { 
+            font-weight: bold; 
+        }
+        
+        /* --- Bottom Navigation Bar --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #e9ecef;
+            padding-top: 0.5rem;
+            padding-bottom: 0.25rem;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        .bottom-nav a {
+            color: #6c757d; /* Muted text color */
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .bottom-nav a.active {
+            color: #0d6efd; /* Bootstrap Primary color */
+        }
+        .bottom-nav .bi {
+            font-size: 1.5rem;
+            display: block;
+            margin: 0 auto 0.25rem;
+        }
+        /* Special style for the 'Add' button */
+        .bottom-nav .add-btn .bi {
+            font-size: 2.5rem; /* Make it bigger */
+            margin-top: -1.25rem; /* Make it pop up */
+            color: #0d6efd;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+        }
+        
+        /* --- Login/Register Form Styling --- */
+        .form-signin {
+            max-width: 400px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Flash Messages (for errors/success) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button typebutton" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Page content from other files will be injected here -->
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Bottom Navigation (Only show if user is logged in) -->
+{% if current_user.is_authenticated %}
+<nav class="bottom-nav d-block">
+    <div class="container">
+        <div class="row text-center">
+            <!-- Home -->
+            <div class="col">
+                <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">
+                    <i class="bi bi-house-door-fill"></i> Home
+                </a>
+            </div>
+            <!-- Analytics -->
+            <div class="col">
+                <a href="{{ url_for('analytics') }}" class="{{ 'active' if request.endpoint == 'analytics' else '' }}">
+                    <i class="bi bi-bar-chart-line-fill"></i> Analytics
+                </a>
+            </div>
+            <!-- Add Transaction (Big Button) -->
+            <div class="col add-btn">
+                <a href="{{ url_for('add_transaction') }}" class="{{ 'active' if request.endpoint == 'add_transaction' else '' }}">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span style="visibility: hidden;">Add</span> <!-- Placeholder for alignment -->
+                </a>
+            </div>
+            <!-- Transactions List -->
+            <div class="col">
+                <a href="{{ url_for('transactions') }}" class="{{ 'active' if request.endpoint == 'transactions' else '' }}">
+                    <i class="bi bi-card-list"></i> Transactions
+                </a>
+            </div>
+            <!-- Profile -->
+            <div class="col">
+                <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+                    <i class="bi bi-person-fill"></i> Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Any page-specific JavaScript will go here -->
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

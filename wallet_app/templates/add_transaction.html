@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        <h2 class="fw-bold mb-4">Add Transaction</h2>
+        <form action="" method="POST">
+            
+            <div class="mb-3">
+                <label for="type" class="form-label">Transaction Type</label>
+                <select class="form-select" id="type" name="type" required>
+                    <option value="">Select Transaction Type</option>
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount (₹)</label>
+                <input class="form-control" type="number" step="0.01" id="amount" name="amount" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category" required>
+                    <option value="">First, select a type</option>
+                </select>
+            </div>
+            
+            <!-- NEW: Hidden div for Custom Category -->
+            <div class="mb-3" id="custom_category_div" style="display: none;">
+                <label for="category_custom" class="form-label">Custom Category Name</label>
+                <input class="form-control" type="text" id="category_custom" name="category_custom" placeholder="e.g., Birthday Gift">
+            </div>
+            
+            <!-- Hidden div for P2P Transfer -->
+            <div class="mb-3" id="receiver_div" style="display: none;">
+                <label for="receiver_id" class="form-label">Select Receiver</label>
+                <select class="form-select" name="receiver_id" id="receiver_id">
+                    <option value="">Select user to transfer to</option>
+                    {% for user in all_users %}
+                    <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="reference" class="form-label">Reference (Optional)</label>
+                <input class="form-control" type="text" id="reference" name="reference" placeholder="e.g., Lunch with friends">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100">Add Transaction</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- This JavaScript powers the dynamic category form -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type');
+    const categorySelect = document.getElementById('category');
+    
+    // Get the new elements
+    const receiverDiv = document.getElementById('receiver_div');
+    const receiverSelect = document.getElementById('receiver_id');
+    const customCategoryDiv = document.getElementById('custom_category_div');
+    const customCategoryInput = document.getElementById('category_custom');
+
+    // This function runs when the 'Type' (Income/Expense) dropdown changes
+    async function updateCategories() {
+        const selectedType = typeSelect.value;
+        categorySelect.innerHTML = '<option value="">Loading...</option>';
+        
+        if (!selectedType) {
+            categorySelect.innerHTML = '<option value="">First, select a type</option>';
+            return;
+        }
+        
+        // This fetches the categories from your app.py
+        const response = await fetch(`/api/categories?type=${selectedType}`);
+        const categories = await response.json();
+        
+        categorySelect.innerHTML = '<option value="">Select a category</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+        
+        // After updating, reset the conditional fields
+        handleCategoryChange();
+    }
+
+    // This function runs when the 'Category' dropdown changes
+    function handleCategoryChange() {
+        const selectedCategory = categorySelect.value;
+        
+        // 1. Check for 'Transfer'
+        if (selectedCategory === 'Transfer') {
+            receiverDiv.style.display = 'block';
+            receiverSelect.required = true;
+        } else {
+            receiverDiv.style.display = 'none';
+            receiverSelect.required = false;
+        }
+        
+        // 2. Check for 'Others'
+        if (selectedCategory === 'Others') {
+            customCategoryDiv.style.display = 'block';
+            customCategoryInput.required = true;
+        } else {
+            customCategoryDiv.style.display = 'none';
+            customCategoryInput.required = false;
+        }
+    }
+
+    // Event Listeners
+    typeSelect.addEventListener('change', updateCategories);
+    categorySelect.addEventListener('change', handleCategoryChange);
+});
+</script>
+{% endblock %}
