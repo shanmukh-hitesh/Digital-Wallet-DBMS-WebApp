@@ -2,47 +2,49 @@
 Digital Wallet was developed as a part of a DBMS + Web Development project. This application enables the user to note down and keep track of their daily incomes and expenses including the intent or cause of a transaction.
 
 
-# 💳 Digital Wallet – Transaction History Web App
+# 💳 Digital Wallet – Transaction History Web App (DBMS + WebDev)
 
-A Digital Wallet developed under **DBMS + Web Development project**, designed for recording and managing personal financial transactions. Users can store both **income and expenses**, along with the reason for each transaction, and view their balance and spending insights through visual charts.
+A Digital Wallet system built under **DBMS + Web Development** to store and track user financial transactions.  
+This application allows users to add both **income and expenses**, along with the reason/purpose, and displays analytics through graphical charts. It provides a clean UI and simple navigation, making expense management smooth and user-friendly.
 
 ---
 
 ## 🚀 Features
 
-### 🟢 Core Functionalities
-- Add and store **Income & Expense** transactions
-- Mention **purpose/reason** for each transaction
-- View full **transaction history**
+### 🟩 Core Wallet Functions
+- Add and track **Income** & **Expenses**
+- Store purpose/reason for each transaction
+- View complete **transaction history**
 
-### 📊 Analytics Dashboard
-- **Pie Chart** for category-wise expense distribution
-- **Balance Graph** representing spending vs earnings over time
+### 📊 Finance Analytics
+- **Pie Chart** showing expense distribution by category
+- **Balance Graph** for visual spending insight
 
-### 🔐 User Account Management
-- **Signup & Login** required to access the wallet
-- **Secure authentication**
-- Option to **permanently delete account** along with all stored data
+### 🔐 Account System
+- User must **Sign Up** to login
+- Only authenticated users can access the wallet
+- Option to **permanently delete account** with data
 
-### 💡 UX Design
-- Clean, simplified interface  
-- Easy navigation for smooth user experience  
+### 🖥 UX Design
+- Simple interface  
+- Easy to understand and follow
 
 ---
 
 ## 🛠 Tech Stack
 
 | Component | Technology |
-|----------|------------|
-| Backend  | Flask (Python) |
-| Database | MySQL + SQLAlchemy ORM |
-| Auth     | Flask-Login |
-| Charts   | Chart.js / Visualization via templates |
-| Frontend | HTML + CSS + Jinja2 Templates |
+|---------|-------------|
+| Backend | Flask (Python) |
+| Database | MySQL |
+| ORM | SQLAlchemy |
+| Authentication | Flask-Login |
+| Templates | HTML + CSS + Jinja2 |
 
 ---
 
-## ⚙ Setup & Run (Local System)
+## ⚙ Installation & Run
 
 ```bash
 pip install -r requirements.txt
+python app.py
